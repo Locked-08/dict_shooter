@@ -81,7 +81,7 @@ class Enemy(Ship):
         super().__init__(x,y)
         self.ship_img, self.laser_img = self.COLOR_MAP[color]
         self.mask = pygame.mask.from_surface(self.ship_img)
-        self.vel = random.randint(3,8)
+        self.vel = random.randint(3,6)
     def move(self):
             self.y += self.vel
             
@@ -123,7 +123,7 @@ def init_game():
     print("game")
     clock = pygame.time.Clock()
     player = Player(50, 50)
-    player_vel = 5
+    player_vel = 10
     laser_vel = 10
     lost = False
     level = 0
@@ -144,6 +144,7 @@ def init_game():
         WINDOW.blit(live_label, (10, 10))
         WINDOW.blit(level_label, (WINDOW_WIDTH - level_label.get_width() - 10, 10))
         WINDOW.blit(score_label, (10, 70))
+        pygame.draw.circle(WINDOW, (27,5,89), (player.x +25, player.y+25), 100)
         player.draw(WINDOW)
         if lost:
             lost_label = main_font.render(f"You lost! Score: {player.score}", 1, (255,255, 255))
@@ -157,16 +158,17 @@ def init_game():
                 enemies.append(enemy)
         for enemy in enemies:
             enemy.draw(WINDOW)
+
                 
         pygame.display.update()
-        if lives <=0 or player.health <= 0:
-            lost = True
-            lost_countdown +=1 
-            if lost:
-                if lost_countdown > FPS * 3:
-                    run = False
-                else:
-                    continue
+        # if lives <=0 or player.health <= 0:
+        #     lost = True
+        #     lost_countdown +=1 
+        #     if lost:
+        #         if lost_countdown > FPS * 3:
+        #             run = False
+        #         else:
+        #             continue
         
         keys = pygame.key.get_pressed()
         if keys[pygame.K_UP] and player.y - player_vel > 0:
@@ -180,7 +182,10 @@ def init_game():
         if keys[pygame.K_SPACE]:
             player.shoot()
         for enemy in enemies[:]:
+            if random.randrange(0,4 * 60 - level) == 1:
+                enemy.shoot()
             enemy.move()
+            enemy.move_lasers(laser_vel, player)
             if collide(enemy, player):
                 enemies.remove(enemy)
                 player.health -=10
